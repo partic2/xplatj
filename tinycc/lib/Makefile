@@ -33,8 +33,8 @@ endif
 
 DSO_O = dsohandle.o
 
-I386_O = libtcc1.o alloca.o $(BT_O) stdatomic.o
-X86_64_O = libtcc1.o alloca.o $(BT_O) stdatomic.o
+I386_O = libtcc1.o alloca.o alloca-bt.o $(BT_O) stdatomic.o
+X86_64_O = libtcc1.o alloca.o alloca-bt.o $(BT_O) stdatomic.o
 ARM_O = libtcc1.o armeabi.o alloca.o armflush.o fetch_and_add.o $(BT_O)
 ARM64_O = lib-arm64.o fetch_and_add.o $(BT_O)
 RISCV64_O = lib-arm64.o fetch_and_add.o $(BT_O)

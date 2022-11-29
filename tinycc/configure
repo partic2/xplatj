@@ -57,7 +57,7 @@ test -n "$CC" && cc="$CC"
 # OS specific
 cpu=`uname -m`
 cpu_sys="$cpu"
-
+targetos=`uname`
 test "$(uname -o)" = "Android" && targetos=Android
 
 case $targetos in
