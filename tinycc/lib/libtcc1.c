@@ -632,10 +632,3 @@ const float __mzerosf = -0.0;
 const double __mzerodf = -0.0;
 #endif
 
-#if defined _WIN64
-/* MSVC x64 intrinsic */
-void __faststorefence(void)
-{
-    __asm__("lock; orl $0,(%rsp)");
-}
-#endif
