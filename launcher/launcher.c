@@ -37,6 +37,8 @@ int main(int argc, char *argv[]) {
       opType = 1;
     } else if (strcmp(buf, "sdl") == 0) {
       opType = 2;
+    } else if (strcmp(buf,"webapp") == 0) {
+      opType = 1;
     }
     fscanf(flatConfigFile, "%s", buf);
     if (strcmp(buf, "reboot") == 0 || firstStartup) {
