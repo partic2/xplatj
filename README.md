@@ -57,8 +57,8 @@ To use dependency in maven, Use tools/install-local-maven.sh to install maven de
 
 Linux is still not fully supported, but should be easy to do. The libgdx native libraries required by linux was also packed into jar file.
 
-### Two backend
-You can switch the backend by modify the config file "$RESOURCE_DIR/flat" in generated package. The first word control the backend and can be one of gdx or sdl.
+### Three backend
+You can switch the backend by modify the config file "$RESOURCE_DIR/flat") The first word control the backend and can be one of gdx ,webapp or sdl.
 
 When use gdx backend, xplatj load classfile refer by cfg.ini
 

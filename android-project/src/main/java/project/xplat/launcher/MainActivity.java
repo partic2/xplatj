@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
 	private Intent intent;
 	public static String gdxFlag="gdx";
 	public static String sdlFlag="sdl";
-	public static String webFlag="web";
+	public static String webappFlag="webapp";
 	public static String shutdownFlag="shutdown";
 	public static String rebootFlag="reboot";
 
@@ -142,7 +142,7 @@ public class MainActivity extends Activity {
 				intent=new Intent();
 				intent.setClass(this,Class.forName("project.sdl.MainActivity"));
 				this.startActivityForResult(intent,1);
-			}else if(webFlag.equals(selectedBackend)){
+			}else if(webappFlag.equals(selectedBackend)){
 				intent=new Intent();
 				intent.setClass(this,Class.forName("project.webapp.MainActivity"));
 				this.startActivityForResult(intent,1);
