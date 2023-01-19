@@ -7,6 +7,8 @@ import android.os.Build;
 import project.xplat.launcher.pxprpcapi.ApiServer;
 import pursuer.pxprpc.EventDispatcher;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE)
-public class Sensor2 extends EventDispatcher implements SensorEventListener {
+public class Sensor2 extends EventDispatcher implements SensorEventListener, Closeable {
     private SensorManager smgr;
     public Sensor2(){
         this.smgr=(SensorManager) ApiServer.defaultAndroidContext.getSystemService(Context.SENSOR_SERVICE);
@@ -98,5 +100,10 @@ public class Sensor2 extends EventDispatcher implements SensorEventListener {
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.sensorStopAll();
     }
 }

@@ -12,6 +12,10 @@ import android.util.Size;
 import android.view.Surface;
 import project.xplat.launcher.pxprpcapi.ApiServer;
 import project.xplat.launcher.pxprpcapi.Utils;
+import pursuer.patchedmsgpack.tools.ArrayBuilder2;
+import pursuer.patchedmsgpack.tools.MPValueTable;
+import pursuer.patchedmsgpack.tools.MapBuilder2;
+import pursuer.patchedmsgpack.value.ArrayValue;
 import pursuer.pxprpc.AsyncReturn;
 import pursuer.pxprpc.EventDispatcher;
 
@@ -41,28 +45,20 @@ public class AndroidCamera2 {
         return Utils.joinStringList(Arrays.asList(camSvr.getCameraIdList()),"\n");
     }
 
-    public String getBaseCameraInfo(String id) throws CameraAccessException {
+    public byte[] describeBaseCameraInfo(String id) throws CameraAccessException {
         CameraCharacteristics info = camSvr.getCameraCharacteristics(id);
-        StringBuilder sb=new StringBuilder();
-        sb.append("face:");
-        if(info.get(CameraCharacteristics.LENS_FACING)==0){
-            sb.append("front");
-        }else{
-            sb.append("back");
-        }
-        sb.append("\n");
-        sb.append("flashAvailable:");
-        sb.append(info.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)?1:0);
-        sb.append("\n");
+        MapBuilder2 mb = new MapBuilder2();
+        mb.put("face",info.get(CameraCharacteristics.LENS_FACING))
+                        .put("flashAvailable",info.get(CameraCharacteristics.FLASH_INFO_AVAILABLE));
         StreamConfigurationMap sscm = info.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-        sb.append("size:");
+
         Size[] sizes = sscm.getOutputSizes(ImageFormat.YUV_420_888);
+        ArrayBuilder2 sizevalue = new ArrayBuilder2();
         for(Size e : sizes){
-            sb.append(e.getWidth()+","+e.getHeight());
-            sb.append(" ");
+            sizevalue.add(new ArrayBuilder2().add(e.getWidth()).add(e.getHeight()).build());
         }
-        sb.append("\n");
-        return sb.toString();
+        mb.put("outputSizes",sizevalue.build());
+        return Utils.packFrom(mb.build());
     }
 
     public static class CameraWrap1 extends EventDispatcher implements Closeable{
@@ -190,19 +186,37 @@ public class AndroidCamera2 {
         return Arrays.asList(plane1);
     }
 
-    public String getPlaneInfo(Image.Plane plane1){
-        StringBuilder sb=new StringBuilder();
-        sb.append("pixelStride:"+plane1.getPixelStride()+"\n")
-                .append("rowStride:"+plane1.getRowStride()+"\n");
-        return sb.toString();
+    public byte[] describePlaneInfo(List<Image.Plane> planes){
+        MPValueTable vt = new MPValueTable();
+        vt.header(new String[]{"pixelStride","rowStride"});
+        for(Image.Plane e:planes){
+            vt.addRow(new ArrayBuilder2()
+                    .add(e.getPixelStride())
+                    .add(e.getRowStride())
+                    .build());
+        }
+        return Utils.packFrom(vt.toValue());
     }
 
-    public byte[] getPlaneData(Image.Plane plane1){
+    public byte[] getPlaneBufferData(Image.Plane plane1){
         ByteBuffer buf1 = plane1.getBuffer();
         //avoid method signature error on low version android.
         byte[] buf2 = new byte[((ByteBuffer)buf1).remaining()];
         buf1.get(buf2);
         return buf2;
+    }
+
+    public byte[] packPlaneData(List<Image.Plane> planes){
+        MPValueTable vt = new MPValueTable();
+        vt.header(new String[]{"pixelStride","rowStride","buffer"});
+        for(Image.Plane e:planes){
+            vt.addRow(new ArrayBuilder2()
+                    .add(e.getPixelStride())
+                    .add(e.getRowStride())
+                    .add(getPlaneBufferData(e))
+                    .build());
+        }
+        return Utils.packFrom(vt.toValue());
     }
 
 }

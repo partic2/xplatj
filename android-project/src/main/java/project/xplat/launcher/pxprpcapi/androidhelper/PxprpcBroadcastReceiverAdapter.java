@@ -13,12 +13,12 @@ public class PxprpcBroadcastReceiverAdapter extends BroadcastReceiver {
         this.dispatcher=new EventDispatcher();
     }
 
-    public EventDispatcher asDispatcher(){
+    public EventDispatcher eventDispatcher(){
         return dispatcher;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        this.dispatcher.fireEvent(intent);
+        this.dispatcher.fireEvent(intent.getAction());
     }
 }

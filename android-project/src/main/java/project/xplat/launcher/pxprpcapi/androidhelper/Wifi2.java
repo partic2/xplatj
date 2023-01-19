@@ -16,8 +16,15 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import project.xplat.launcher.pxprpcapi.ApiServer;
+import project.xplat.launcher.pxprpcapi.Utils;
+import pursuer.patchedmsgpack.tools.ArrayBuilder2;
+import pursuer.patchedmsgpack.tools.MPValueTable;
+import pursuer.patchedmsgpack.tools.MapBuilder2;
+import pursuer.patchedmsgpack.value.Value;
+import pursuer.patchedmsgpack.value.ValueFactory;
 import pursuer.pxprpc.AsyncReturn;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -26,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class Wifi2 extends PxprpcBroadcastReceiverAdapter{
+public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
     WifiManager wm;
     WifiP2pManager wpm;
     ConnectivityManager cm;
@@ -36,45 +43,51 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter{
             wpm=(WifiP2pManager) ApiServer.defaultAndroidContext.getSystemService(Context.WIFI_P2P_SERVICE);
         }
         cm=(ConnectivityManager) ApiServer.defaultAndroidContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        init();
     }
-    public void scan(){
-        IntentFilter if2 = new IntentFilter();
-        if2.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        ApiServer.defaultAndroidContext.registerReceiver(this, if2);
-        wm.startScan();
-    }
-    public List<ScanResult> getScanResult(){
-        return wm.getScanResults();
-    }
-    public String scanResultsToString(List<ScanResult> l){
-        StringBuilder info1=new StringBuilder();
-        for(ScanResult r:l){
-            info1.append(r.SSID).append(",").append(r.level).append("\n");
-        }
-        return info1.toString();
-    }
-    public String getState(){
-        StringBuilder sb=new StringBuilder();
-        sb.append("enable:").append(wm.isWifiEnabled()).append("\n");
-        return sb.toString();
-    }
-    public void setWifiEnable(boolean enable){
-        wm.setWifiEnabled(enable);
-    }
-    public void disconnect(){
-        wm.disconnect();
-    }
-    public void registerWifiListener(){
+    public void init(){
         IntentFilter if2 = new IntentFilter();
         if2.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         if2.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         if2.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         if2.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         if2.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        if2.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         ApiServer.defaultAndroidContext.registerReceiver(this, if2);
     }
-    public void unregisterAllListener(){
+    public void close(){
         ApiServer.defaultAndroidContext.unregisterReceiver(this);
+    }
+    public void scan(){
+        wm.startScan();
+    }
+    public List<ScanResult> getScanResult(){
+        return wm.getScanResults();
+    }
+    public byte[] packScanResult(List<ScanResult> l){
+        MPValueTable vt = new MPValueTable().header(new String[]{"SSID","level","frequency","capabilities"});
+        for(ScanResult r:l){
+        	vt.addRow(new ArrayBuilder2().add(r.SSID).add(r.level).add(r.frequency).add(r.capabilities).build());
+        }
+        return Utils.packFrom(vt.toValue());
+    }
+    public byte[] getWifiInfo1(){
+        return Utils.packFrom(new MapBuilder2()
+                .put("5GHzBandSupported",wm.is5GHzBandSupported())
+                .put("P2pSupported",wm.isP2pSupported())
+                .build());
+    }
+    public byte[] getState(){
+        return Utils.packFrom(new MapBuilder2()
+        		.put("WifiEnabled", wm.isWifiEnabled())
+        		.put("WifiState",wm.getWifiState())
+        		.build());
+    }
+    public void setWifiEnable(boolean enable){
+        wm.setWifiEnabled(enable);
+    }
+    public void disconnect(){
+        wm.disconnect();
     }
 
     public void connectTo(String ssid,String psk){
@@ -163,13 +176,12 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter{
         });
     }
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void p2pPeersInfo(ArrayList<WifiP2pDevice> peers){
-        StringBuilder sb=new StringBuilder();
+    public byte[] describeP2pPeersInfo(ArrayList<WifiP2pDevice> peers){
+        MPValueTable table = new MPValueTable().header(new String[]{"deviceAddress", "deviceName", "status"});
         for(WifiP2pDevice p:peers){
-            sb.append(p.deviceAddress).append(",")
-                    .append(p.deviceName).append(",")
-                    .append(p.status).append("\n");
+            table.addRow(new ArrayBuilder2().add(p.deviceAddress).add(p.deviceName).add(p.status).build());
         }
+        return Utils.packFrom(table.toValue());
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)

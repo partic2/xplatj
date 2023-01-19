@@ -9,6 +9,7 @@ import project.xplat.launcher.pxprpcapi.androidhelper.*;
 import project.xplat.launcher.pxprpcapi.videocapture.AndroidCamera2;
 import pursuer.pxprpc_ex.TCPBackend;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
@@ -20,6 +21,9 @@ public class ApiServer {
     public static HandlerThread handlerThread;
     public static Handler handler;
     public static int port=2050;
+    
+    public static SysBase sysbase;
+
     public static Handler getHandler(){
         return handler;
     }
@@ -41,13 +45,15 @@ public class ApiServer {
         handler.post(new Runnable(){
             @Override
             public void run() {
-                putModule("AndroidHelper-SysBase",new SysBase());
+            	ApiServer.sysbase=new SysBase();
+                putModule("AndroidHelper-SysBase",sysbase);
                 putModule("AndroidHelper-Camera2",new AndroidCamera2());
                 putModule("AndroidHelper-Bluetooth",new Bluetooth2());
                 putModule("AndroidHelper-Intent",new Intent2());
                 putModule("AndroidHelper-Sensor",new Sensor2());
                 putModule("AndroidHelper-Wifi",new Wifi2());
                 putModule("AndroidHelper-Misc",new Misc2());
+                putModule("AndroidHelper-Power",new Power2());
             }
         });
         Log.d("PxpRpc", "start: listen");
@@ -72,15 +78,23 @@ public class ApiServer {
             }
         }).start();
     }
+    public static void closeQuietly(Closeable c){
+        try {
+            c.close();
+        } catch (IOException e) {
+        }
+    }
     public static void stop(){
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    tcpServ.close();
-                    tcpServ =null;
-                } catch (IOException e) {
+                closeQuietly(tcpServ);
+                for(Object mod:ApiServer.tcpServ.funcMap.values()){
+                    if(mod instanceof Closeable){
+                        closeQuietly((Closeable) mod);
+                    }
                 }
+                tcpServ=null;
             }
         }).start();
 
