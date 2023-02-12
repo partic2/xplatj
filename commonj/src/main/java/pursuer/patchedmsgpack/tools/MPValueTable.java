@@ -7,8 +7,8 @@ import pursuer.patchedmsgpack.value.Value;
 import pursuer.patchedmsgpack.value.ValueFactory;
 
 public class MPValueTable{
-	public Value[] header;
-	public ArrayList<ArrayValue> rows;
+	public Value[] header=new Value[] {};
+	public ArrayList<ArrayValue> rows=new ArrayList<ArrayValue>();
 	public MPValueTable header(Value[] header) {
 		this.header=header;
 		return this;
@@ -20,7 +20,6 @@ public class MPValueTable{
 		}
 		return this;
 	}
-	public ArrayList<Value> lastRow;
 	public MPValueTable addRow(ArrayValue row){
 		this.rows.add(row);
 		return this;

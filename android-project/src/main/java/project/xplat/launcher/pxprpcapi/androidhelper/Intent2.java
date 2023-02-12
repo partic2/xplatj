@@ -84,7 +84,7 @@ public class Intent2 {
     }
     public void requestImageCapture(String imagePath){
         String uri=getContentUriForFile(imagePath);
-        Intent intent=new Intent();
+        Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT,uri);
         ApiServer.defaultAndroidContext.startActivity(intent);
     }

@@ -55,9 +55,8 @@ public abstract class MessageBuffer
      */
     static final int ARRAY_BYTE_BASE_OFFSET;
 
-    private static final String UNIVERSAL_MESSAGE_BUFFER = "org.msgpack.core.buffer.MessageBufferU";
-    private static final String BIGENDIAN_MESSAGE_BUFFER = "org.msgpack.core.buffer.MessageBufferBE";
-    private static final String DEFAULT_MESSAGE_BUFFER = "org.msgpack.core.buffer.MessageBuffer";
+    private static final String UNIVERSAL_MESSAGE_BUFFER = "pursuer.patchedmsgpack.core.buffer.MessageBufferU";
+    private static final String DEFAULT_MESSAGE_BUFFER = "pursuer.patchedmsgpack.core.buffer.MessageBuffer";
 
     static {
         boolean useUniversalBuffer = true;
@@ -76,7 +75,7 @@ public abstract class MessageBuffer
         else {
             // Check the endian of this CPU
             boolean isLittleEndian = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
-            bufferClsName = isLittleEndian ? DEFAULT_MESSAGE_BUFFER : BIGENDIAN_MESSAGE_BUFFER;
+            bufferClsName = DEFAULT_MESSAGE_BUFFER ;
         }
 
         if (DEFAULT_MESSAGE_BUFFER.equals(bufferClsName)) {

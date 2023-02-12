@@ -4,6 +4,7 @@ import pursuer.patchedmsgpack.core.MessageBufferPacker;
 import pursuer.patchedmsgpack.core.MessagePack;
 import pursuer.patchedmsgpack.value.Value;
 import pursuer.patchedmsgpack.value.ValueFactory;
+import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package project.xplat.launcher.pxprpcapi.videocapture;
+package project.xplat.launcher.pxprpcapi.androidhelper;
 
 import android.annotation.TargetApi;
 import android.content.Context;

@@ -6,7 +6,6 @@ import android.os.HandlerThread;
 import android.util.Log;
 import project.xplat.launcher.MainActivity;
 import project.xplat.launcher.pxprpcapi.androidhelper.*;
-import project.xplat.launcher.pxprpcapi.videocapture.AndroidCamera2;
 import pursuer.pxprpc_ex.TCPBackend;
 
 import java.io.Closeable;
