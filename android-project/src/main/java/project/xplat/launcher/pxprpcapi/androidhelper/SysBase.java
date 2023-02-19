@@ -14,6 +14,7 @@ import pursuer.patchedmsgpack.value.MapValue;
 import pursuer.patchedmsgpack.value.ValueFactory;
 import pursuer.patchedmsgpack.value.ValueFactory.MapBuilder;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.UUID;
@@ -94,5 +95,9 @@ public class SysBase {
 			}
 		}
 		return Utils.packFrom(mb.build());
+	}
+
+	public void close(Closeable c) {
+		ApiServer.closeQuietly(c);
 	}
 }

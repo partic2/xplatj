@@ -22,6 +22,7 @@ public class ApiServer {
     public static int port=2050;
     
     public static SysBase sysbase;
+    public static AndroidCamera2 androidcamera2;
 
     public static Handler getHandler(){
         return handler;
@@ -45,8 +46,9 @@ public class ApiServer {
             @Override
             public void run() {
             	ApiServer.sysbase=new SysBase();
+            	ApiServer.androidcamera2=new AndroidCamera2();
                 putModule("AndroidHelper-SysBase",sysbase);
-                putModule("AndroidHelper-Camera2",new AndroidCamera2());
+                putModule("AndroidHelper-Camera2",androidcamera2);
                 putModule("AndroidHelper-Bluetooth",new Bluetooth2());
                 putModule("AndroidHelper-Intent",new Intent2());
                 putModule("AndroidHelper-Sensor",new Sensor2());
