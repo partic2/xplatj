@@ -47,14 +47,14 @@ public class ApiServer {
             public void run() {
             	ApiServer.sysbase=new SysBase();
             	ApiServer.androidcamera2=new AndroidCamera2();
-                putModule("AndroidHelper-SysBase",sysbase);
-                putModule("AndroidHelper-Camera2",androidcamera2);
-                putModule("AndroidHelper-Bluetooth",new Bluetooth2());
-                putModule("AndroidHelper-Intent",new Intent2());
-                putModule("AndroidHelper-Sensor",new Sensor2());
-                putModule("AndroidHelper-Wifi",new Wifi2());
-                putModule("AndroidHelper-Misc",new Misc2());
-                putModule("AndroidHelper-Power",new Power2());
+                putModule(SysBase.PxprpcNamespace,sysbase);
+                putModule(AndroidCamera2.PxprpcNamespace,androidcamera2);
+                putModule(Bluetooth2.PxprpcNamespace,new Bluetooth2());
+                putModule(Intent2.PxprpcNamespace,new Intent2());
+                putModule(Sensor2.PxprpcNamespace,new Sensor2());
+                putModule(Wifi2.PxprpcNamespace,new Wifi2());
+                putModule(Misc2.PxprpcNamespace,new Misc2());
+                putModule(Power2.PxprpcNamespace,new Power2());
             }
         });
         Log.d("PxpRpc", "start: listen");

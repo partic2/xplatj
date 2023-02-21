@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
+    public static final String PxprpcNamespace="AndroidHelper-Wifi";
     WifiManager wm;
     WifiP2pManager wpm;
     ConnectivityManager cm;
@@ -43,9 +44,6 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
             wpm=(WifiP2pManager) ApiServer.defaultAndroidContext.getSystemService(Context.WIFI_P2P_SERVICE);
         }
         cm=(ConnectivityManager) ApiServer.defaultAndroidContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        init();
-    }
-    public void init(){
         IntentFilter if2 = new IntentFilter();
         if2.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         if2.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -55,8 +53,12 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         if2.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         ApiServer.defaultAndroidContext.registerReceiver(this, if2);
     }
+    public void init(){
+    }
     public void close(){
-        ApiServer.defaultAndroidContext.unregisterReceiver(this);
+        try {
+            ApiServer.defaultAndroidContext.unregisterReceiver(this);
+        }catch(Exception e){}
     }
     public void scan(){
         wm.startScan();

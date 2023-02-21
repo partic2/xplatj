@@ -13,6 +13,10 @@ import pursuer.patchedmsgpack.tools.MapBuilder2;
 import pursuer.pxprpc.EventDispatcher;
 
 public class Power2 extends PxprpcBroadcastReceiverAdapter {
+
+    public static final String PxprpcNamespace="AndroidHelper-Power";
+
+
     BatteryManager bm;
     PowerManager pm;
 

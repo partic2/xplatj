@@ -19,6 +19,9 @@ import java.util.Map;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE)
 public class Sensor2 extends EventDispatcher implements SensorEventListener, Closeable {
+
+    public static final String PxprpcNamespace="AndroidHelper-Sensor";
+
     private SensorManager smgr;
     public Sensor2(){
         this.smgr=(SensorManager) ApiServer.defaultAndroidContext.getSystemService(Context.SENSOR_SERVICE);

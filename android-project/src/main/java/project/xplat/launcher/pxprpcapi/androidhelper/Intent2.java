@@ -16,6 +16,7 @@ import pursuer.patchedmsgpack.value.ValueFactory;
 import java.io.File;
 
 public class Intent2 {
+    public static final String PxprpcNamespace="AndroidHelper-Intent";
     public void requestInstallApk(String apkPath){
         Intent intent = new Intent(Intent.ACTION_VIEW);
         File file = new File(apkPath);

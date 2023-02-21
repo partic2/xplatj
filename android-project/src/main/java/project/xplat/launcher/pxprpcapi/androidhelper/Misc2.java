@@ -5,17 +5,14 @@ import android.app.Service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureRequest;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.*;
-import android.view.Surface;
+import android.hardware.Camera;
 import project.xplat.launcher.pxprpcapi.ApiServer;
 import project.xplat.launcher.pxprpcapi.Utils;
 import project.xplat.launcher.pxprpcapi.androidhelper.AndroidCamera2.CameraWrap1;
@@ -24,6 +21,7 @@ import pursuer.patchedmsgpack.tools.MPValueTable;
 import pursuer.patchedmsgpack.tools.MapBuilder2;
 import pursuer.pxprpc.AsyncReturn;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -32,6 +30,8 @@ import java.util.List;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class Misc2 {
+	public static final String PxprpcNamespace="AndroidHelper-Misc";
+
 	Vibrator vb;
 	ClipboardManager cbm;
 	AudioManager am;
@@ -41,7 +41,7 @@ public class Misc2 {
 		public int id;
 		public String desc;
 		public String camId;
-		public AndroidCamera2.CameraWrap1 camdev;
+		public Camera1Wrap cam1dev;
 	}
 
 	protected ArrayList<Light2> lights;
@@ -67,11 +67,13 @@ public class Misc2 {
 					tl.id = lights.size();
 					tl.desc = "flash for cameara " + camId;
 					tl.camId = camId;
+					lights.add(tl);
 				}
 			}
 		} catch (CameraAccessException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	public void init() {
@@ -170,57 +172,34 @@ public class Misc2 {
 		return Utils.packFrom(mvt.toValue());
 	}
 
-	public void turnOnLight(final AsyncReturn<Object> aret, int id) {
+	public static class Camera1Wrap implements Closeable {
+		public Camera wrap;
+		public Camera1Wrap(Camera wrap){
+			this.wrap=wrap;
+			ApiServer.androidcamera2.openedResource.add(this);
+		}
+		@Override
+		public void close() throws IOException {
+			wrap.release();
+			ApiServer.androidcamera2.openedResource.remove(this);
+		}
+	}
+	public void turnOnLight(int id) throws CameraAccessException {
 		final Light2 l = this.lights.get(id);
 		final CameraManager camSrv = ApiServer.androidcamera2.camSrv;
-		try {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-				camSrv.setTorchMode(l.camId, true);
-			} else {
-				camSrv.openCamera(l.camId, new CameraDevice.StateCallback() {
-					@Override
-					public void onOpened(CameraDevice camera) {
-						l.camdev = new AndroidCamera2.CameraWrap1(ApiServer.androidcamera2, camera);
-						List<Surface> tarSurf = new ArrayList<Surface>();
-						try {
-							l.camdev.wrapped.createCaptureSession(tarSurf, new CameraCaptureSession.StateCallback() {
-								@Override
-								public void onConfigured(CameraCaptureSession session) {
-									try {
-										l.camdev.capSess = session;
-										CaptureRequest.Builder capReq = l.camdev.wrapped
-												.createCaptureRequest(CameraDevice.TEMPLATE_MANUAL);
-										capReq.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH);
-										session.setRepeatingRequest(capReq.build(), null, ApiServer.handler);
-										aret.result(0);
-									} catch (Exception e) {
-										aret.result(e);
-									}
-								}
 
-								@Override
-								public void onConfigureFailed(CameraCaptureSession session) {
-									aret.result(new RuntimeException("createCaptureSession failed."));
-								}
-							}, ApiServer.getHandler());
-						} catch (Exception e) {
-							aret.result(new Exception("Android Camera2 Error:" + e.toString()));
-						}
-					}
-
-					@Override
-					public void onDisconnected(CameraDevice camera) {
-					}
-
-					@Override
-					public void onError(CameraDevice camera, int error) {
-						aret.result(new Exception("Android Camera2 Error:" + error));
-					}
-				}, ApiServer.getHandler());
-			}
-		} catch (Exception e) {
-			aret.result(e);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			camSrv.setTorchMode(l.camId, true);
+		} else {
+			//we suppose cameraid is just string format of id of old camera api, It's seemed work.
+			Camera dev = Camera.open(Integer.parseInt(l.camId));
+			l.cam1dev=new Camera1Wrap(dev);
+			Camera.Parameters p = dev.getParameters();
+			p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+			dev.setParameters(p);
+			dev.startPreview();
 		}
+
 	}
 
 	public void turnOffLight(int id) throws CameraAccessException {
@@ -228,9 +207,13 @@ public class Misc2 {
 		CameraManager camSrv = ApiServer.androidcamera2.camSrv;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			camSrv.setTorchMode(l.camId, false);
-		} else if(l.camdev!=null){
-			ApiServer.closeQuietly(l.camdev);
-			l.camdev=null;
+		} else if(l.cam1dev!=null){
+			l.cam1dev.wrap.stopPreview();
+			Camera.Parameters p = l.cam1dev.wrap.getParameters();
+			p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+			l.cam1dev.wrap.setParameters(p);
+			ApiServer.closeQuietly(l.cam1dev);
+			l.cam1dev=null;
 		}
 	}
 }

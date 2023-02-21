@@ -28,6 +28,8 @@ import java.util.List;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class AndroidCamera2 {
+    public static final String PxprpcNamespace="AndroidHelper-Camera2";
+
     public CameraManager camSrv;
     public String uid="";
     public ArrayList<Closeable> openedResource=new ArrayList<Closeable>();
@@ -149,7 +151,7 @@ public class AndroidCamera2 {
                         if(camWrap.autoFocusMode>=0)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
                         capReq.addTarget(camWrap.imgRead.getSurface());
                         session.setRepeatingRequest(capReq.build(),null,ApiServer.handler);
-                        aret.result(0);
+                        aret.result(null);
                     }catch (Exception e) {
                         aret.result(e);
                     }
@@ -187,7 +189,7 @@ public class AndroidCamera2 {
                         if(camWrap.autoFocusMode>=0)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
                         capReq.addTarget(camWrap.imgRead.getSurface());
                         session.capture(capReq.build(), null, ApiServer.handler);
-                        aret.result(0);
+                        aret.result(null);
                     }catch (Exception e) {
                         aret.result(e);
                     }
