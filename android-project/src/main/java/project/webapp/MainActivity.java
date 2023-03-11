@@ -1,29 +1,29 @@
 package project.webapp;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.net.http.SslError;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Window;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import lib.pursuer.simplewebserver.PxprpcWsServer;
 import lib.pursuer.simplewebserver.XplatHTTPDServer;
 import org.nanohttpd.protocols.http.NanoHTTPD;
+
 import project.gdx.AndroidModule;
 import project.gdx.AndroidStorage;
 import project.xplat.launcher.AssetsCopy;
 import project.xplat.launcher.pxprpcapi.ApiServer;
+import pursuer.pxprpc.ServerContext;
 import xplatj.gdxconfig.Gdx2;
 import xplatj.gdxconfig.core.PlatCoreConfig;
+import xplatj.javaplat.pursuer.util.IFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.TreeMap;
 
 public class MainActivity extends Activity {
     void bgThread() {
@@ -42,6 +42,14 @@ public class MainActivity extends Activity {
                 }else{
                     httpd = new XplatHTTPDServer("127.0.0.1", httpdPort, new File("/"));
                 }
+                PxprpcWsServer.registeredServer.put(Integer.toString(ApiServer.port), new IFactory<ServerContext>() {
+					@Override
+					public ServerContext create() {
+						ServerContext sc=new ServerContext();
+						sc.funcMap=ApiServer.tcpServ.funcMap;
+						return sc;
+					}
+				});
                 httpd.start(60 * 1000);
             }
         } catch (IOException e) {
