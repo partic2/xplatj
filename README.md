@@ -1,4 +1,7 @@
-# XPLATJ
+# XPLATJ1
+
+## **deprecated**
+**This repository is deprecated and please consider to switch to XPLATJ2**
 
 XPLATJ is a trial project aim to make a cross-platform layer to create application (This project is still in early stage.).
 
